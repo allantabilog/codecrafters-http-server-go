@@ -51,14 +51,14 @@ func handleConnection(conn net.Conn) {
 	// turn the byte array into a string
 	message := string(buf)
 	fmt.Println("Message received: ", message)
-	// split the string into parts delimited by a space
-	parts := strings.Split(message, " ")
+	// split the string into parts delimited by a "/"
+	parts := strings.Split(message, "/")
 	// the path is the second part of the message
 	path := parts[1]
 
 	// if it doesn't match the pattern, return a 404
 	var response string
-	if path != "/echo" {
+	if path != "echo" {
 		response = "HTTP/1.1 404 Not Found\r\n\r\n"
 	}
 
