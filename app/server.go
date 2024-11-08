@@ -71,7 +71,8 @@ func handleConnection(conn net.Conn) {
 		payloadParts := strings.Split(path, "/")
 		// check that there are two parts to the payload
 		// "echo" and  the message
-		if len(payloadParts) != 2 {
+		fmt.Printf("Payload parts %v length %v\n: ", payloadParts, len(payloadParts))
+		if len(payloadParts) != 3 {
 			response = "HTTP/1.1 400 Bad Request\r\n\r\n"
 			_, err = conn.Write([]byte(response))
 			if err != nil {
