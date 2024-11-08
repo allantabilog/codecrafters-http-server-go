@@ -56,24 +56,35 @@ func handleConnection(conn net.Conn) {
 	// the path is the second part of the message
 	path := parts[1]
 
-	// this looks like /echo/{message}
-	// so we split again by "/" to get the message
-	payloadParts := strings.Split(path, "/")
-	// if it doesn't match the pattern, return a 404
 	var response string
-	if payloadParts[1] != "echo" {
-		response = "HTTP/1.1 404 Not Found\r\n\r\n"
-		// write the response back to the client
+	if path == "/" {
+		response = "HTTP/1.1 200 OK\r\n\r\n"
 		_, err = conn.Write([]byte(response))
 		if err != nil {
 			fmt.Println("Error writing to connection:", err.Error())
 			os.Exit(1)
 		}
+		return
 	}
-	// otherwise this is an echo request
-	// we prepare the response
-	fmt.Println("Payload: ", payloadParts[2])
-	response = prepareEchoResponse(payloadParts[2])
+
+	if strings.HasPrefix(path, "/echo") {
+		payloadParts := strings.Split(path, "/")
+		// check that there are two parts to the payload
+		// "echo" and  the message
+		if len(payloadParts) != 2 {
+			response = "HTTP/1.1 400 Bad Request\r\n\r\n"
+			_, err = conn.Write([]byte(response))
+			if err != nil {
+				fmt.Println("Error writing to connection:", err.Error())
+				os.Exit(1)
+			}
+			return
+		}
+		fmt.Println("Payload: ", payloadParts[2])
+		response = prepareEchoResponse(payloadParts[2])
+	} else {
+		response = "HTTP/1.1 404 Not Found\r\n\r\n"
+	}
 
 	// write the response back to the client
 	_, err = conn.Write([]byte(response))
