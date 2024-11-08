@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strings"
 )
 
 // Ensures gofmt doesn't remove the "net" and "os" imports above (feel free to remove this!)
@@ -22,15 +23,46 @@ func main() {
 		os.Exit(1)
 	}
 
-	var conn net.Conn
-	conn, err = l.Accept()
-	if err != nil {
-		fmt.Println("Error accepting connection: ", err.Error())
-		os.Exit(1)
+	for {
+		var conn net.Conn
+		conn, err = l.Accept()
+		if err != nil {
+			fmt.Println("Error accepting connection: ", err.Error())
+			os.Exit(1)
+		}
+		go handleConnection(conn)
 	}
-	_, err = conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+}
+
+func handleConnection(conn net.Conn) {
+	defer conn.Close()
+
+	//create a byte array buffer to read the incoming data
+	buf := make([]byte, 4096)
+	// read into the buffer
+	_, err := conn.Read(buf)
 	if err != nil {
-		fmt.Println("Failed to write to connection")
+		fmt.Println("Error reading from connection:", err.Error())
+	}
+
+	// turn the byte array into a string
+	message := string(buf)
+	fmt.Println("Message received: ", message)
+	// split the string into parts delimited by a space
+	parts := strings.Split(message, " ")
+	// the path is the second part of the message
+	path := parts[1]
+
+	// if it doesn't match the pattern, return a 404
+	response := "HTTP/1.1 200 OK\r\n\r\n"
+	if path != "/" {
+		response = "HTTP/1.1 404 Not Found\r\n\r\n"
+	}
+
+	// write the response back to the client
+	_, err = conn.Write([]byte(response))
+	if err != nil {
+		fmt.Println("Error writing to connection:", err.Error())
 		os.Exit(1)
 	}
 
