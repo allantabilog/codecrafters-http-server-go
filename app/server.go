@@ -22,9 +22,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	_, err = l.Accept()
+	var conn net.Conn
+	conn, err = l.Accept()
 	if err != nil {
 		fmt.Println("Error accepting connection: ", err.Error())
 		os.Exit(1)
 	}
+	_, err = conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+	if err != nil {
+		fmt.Println("Failed to write to connection")
+		os.Exit(1)
+	}
+
 }
