@@ -63,6 +63,7 @@ func handleConnection(conn net.Conn) {
 	}
 
 	payload := parts[2]
+	fmt.Println("Payload: ", payload)
 	response = prepareEchoResponse(payload)
 
 	// write the response back to the client
