@@ -63,8 +63,15 @@ func handleConnection(conn net.Conn) {
 	var response string
 	if payloadParts[1] != "echo" {
 		response = "HTTP/1.1 404 Not Found\r\n\r\n"
+		// write the response back to the client
+		_, err = conn.Write([]byte(response))
+		if err != nil {
+			fmt.Println("Error writing to connection:", err.Error())
+			os.Exit(1)
+		}
 	}
-
+	// otherwise this is an echo request
+	// we prepare the response
 	fmt.Println("Payload: ", payloadParts[2])
 	response = prepareEchoResponse(payloadParts[2])
 
