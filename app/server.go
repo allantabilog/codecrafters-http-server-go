@@ -33,6 +33,9 @@ func main() {
 		go handleConnection(conn)
 	}
 }
+func prepareEchoResponse(message string) string {
+	return "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + fmt.Sprint(len(message)) + "\r\n\r\n" + message
+}
 
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
@@ -54,10 +57,13 @@ func handleConnection(conn net.Conn) {
 	path := parts[1]
 
 	// if it doesn't match the pattern, return a 404
-	response := "HTTP/1.1 200 OK\r\n\r\n"
-	if path != "/" {
+	var response string
+	if path != "/echo" {
 		response = "HTTP/1.1 404 Not Found\r\n\r\n"
 	}
+
+	payload := parts[2]
+	response = prepareEchoResponse(payload)
 
 	// write the response back to the client
 	_, err = conn.Write([]byte(response))
