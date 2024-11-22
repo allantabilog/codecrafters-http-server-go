@@ -113,7 +113,7 @@ func handleFileRequest(path string, conn net.Conn) {
 	fmt.Printf("The filename is: %v\n", filename)
 
 	// read the file contents
-	fileContents, err := os.ReadFile(fmt.Sprintf("/tmp/%s", filename))
+	fileContents, err := os.ReadFile(fmt.Sprintf("/tmp/data/codecrafters.io/http-server-tester/%s", filename))
 	if err != nil {
 		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 		return
