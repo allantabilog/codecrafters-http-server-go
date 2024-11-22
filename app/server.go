@@ -73,6 +73,8 @@ func handleRequest(conn net.Conn) {
 		handleEchoRequest(requestLine.Path, conn)
 	case strings.HasPrefix(requestLine.Path, "/user-agent"):
 		handleUserAgentRequest(headers, conn)
+	case strings.HasPrefix(requestLine.Path, "/files"):		
+		handleFileRequest(requestLine.Path, conn)
 	default:
 		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 	}
@@ -102,5 +104,22 @@ func handleUserAgentRequest(headers map[string]string, conn net.Conn) {
 		return
 	}
 	response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(userAgent), userAgent)
+	conn.Write([]byte(response))
+}
+
+func handleFileRequest(path string, conn net.Conn) {
+	// extract the filename from the path
+	filename := strings.Split(path, "/")[2]
+	fmt.Printf("The filename is: %v\n", filename)
+
+	// read the file contents
+	fileContents, err := os.ReadFile(fmt.Sprintf("/tmp/%s", filename))
+	if err != nil {
+		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+		return
+	}
+
+	// construct the response
+	response := fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", len(fileContents), fileContents)
 	conn.Write([]byte(response))
 }
