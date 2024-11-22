@@ -29,6 +29,8 @@ func main() {
 			os.Exit(1)
 		}
 
+		// spawan a goroutine to handle the connection
+		// this allows the server to handle multiple connections concurrently
 		go handleRequest(conn)
 	}
 }
