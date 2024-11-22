@@ -148,7 +148,7 @@ func handlePostRequest(request string, conn net.Conn) {
 	filename := strings.Split(requestLine.Path, "/")[2]
 	
 	// write the body to the file with filename
-	err = os.WriteFile(fmt.Sprintf("/tmp/%s", filename), []byte(body), 0644)
+	err = os.WriteFile(fmt.Sprintf("/tmp/data/codecrafters.io/http-server-tester/%s", filename), []byte(body), 0644)
 	if err != nil {
 		fmt.Println("Failed to write file")
 		conn.Write([]byte("HTTP/1.1 500 Internal Server Error\r\n\r\n"))
