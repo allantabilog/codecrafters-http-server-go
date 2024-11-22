@@ -94,5 +94,5 @@ func handleConnection(conn net.Conn) {
 		fmt.Println("Error writing to connection:", err.Error())
 		os.Exit(1)
 	}
-
+	// just adding a comment to trigger the process
 }
