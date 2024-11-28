@@ -93,6 +93,7 @@ func handleEchoRequest(path string, headers map[string] string, conn net.Conn) {
 	acceptEncoding, ok := headers["Accept-Encoding"]
 	if ok {
 		// check if the header contains gzip
+		// this should support multiple (comma-separated) list of encodings
 		if strings.Contains(acceptEncoding, "gzip") {
 			contentEncoding = "gzip"
 		}
