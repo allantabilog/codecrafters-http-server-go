@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"compress/gzip"
 	"fmt"
 	"net"
 	"os"
@@ -105,13 +107,21 @@ func handleEchoRequest(path string, headers map[string] string, conn net.Conn) {
 	var response string
 	if (contentEncoding == "gzip") {
 		// add a content-encoding header to the response
-		response = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\nContent-Encoding: %s\r\n\r\n%s", len(message), contentEncoding, message)
+		
+		// gzip-compress the message
+		compressedMessage, err := gzipCompress(message)
+		if err != nil {
+			fmt.Println("Failed to compress message")
+			conn.Write([]byte("HTTP/1.1 500 Internal Server Error\r\n\r\n"))
+		}
+		response = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\nContent-Encoding: %s\r\n\r\n%s", len(compressedMessage), contentEncoding, compressedMessage)
+		conn.Write([]byte(response))
+		
 	} else {
 		// normal response without content-encoding
 		response = fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", len(message), message)
+		conn.Write([]byte(response))
 	}
-	
-	conn.Write([]byte(response))
 }
 
 func handleUserAgentRequest(headers map[string]string, conn net.Conn) {
@@ -172,4 +182,17 @@ func handlePostRequest(request string, conn net.Conn) {
 		return
 	}
 	conn.Write([]byte("HTTP/1.1 201 Created\r\n\r\n"))
+}
+
+func gzipCompress(data string) ([]byte, error) {
+	var buf bytes.Buffer 
+	gzipWriter := gzip.NewWriter(&buf)
+	_, err := gzipWriter.Write([]byte(data))
+	if err != nil {
+		return nil, err
+	}
+	if err := gzipWriter.Close(); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
